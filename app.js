@@ -40,14 +40,18 @@ var SlackChannelHistoryLogger = (function () {
     };
     SlackChannelHistoryLogger.prototype.run = function () {
         var _this = this;
+        // slackのユーザーリストを取得
         var usersResp = this.requestSlackAPI('users.list');
         usersResp.members.forEach(function (member) {
             _this.memberNames[member.id] = member.name;
         });
+        // ワークスペースのチーム情報を取得
         var teamInfoResp = this.requestSlackAPI('team.info');
         this.teamName = teamInfoResp.team.name;
-        var channelsResp = this.requestSlackAPI('channels.list');
-        for (var _i = 0, _a = channelsResp.channels; _i < _a.length; _i++) {
+
+        // 見えているchannelリストを取得
+        var groupsResp = this.requestSlackAPI('groups.list');
+        for (var _i = 0, _a = groupsResp.groups; _i < _a.length; _i++) {
             var ch = _a[_i];
             this.importChannelHistoryDelta(ch);
         }
@@ -190,7 +194,7 @@ var SlackChannelHistoryLogger = (function () {
                 options['oldest'] = oldest;
             }
             // order: recent-to-older
-            var resp = _this.requestSlackAPI('channels.history', options);
+            var resp = _this.requestSlackAPI('groups.history', options);
             messages = resp.messages.concat(messages);
             return resp;
         };
